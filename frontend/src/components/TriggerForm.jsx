@@ -34,14 +34,19 @@ export default function TriggerForm({ onTriggered }) {
       <h2 className="mb-4 text-lg font-semibold text-white">Manual Trigger</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Error / Stack Trace</label>
+          <label className="mb-1 block text-sm text-gray-400">
+            Error / Stack Trace
+            <span className="ml-2 text-xs text-gray-500">
+              — must include the full Python traceback (starting with "Traceback (most recent call last):")
+            </span>
+          </label>
           <textarea
             value={errorText}
             onChange={(e) => setErrorText(e.target.value)}
             required
-            rows={4}
-            placeholder="TypeError: Cannot read property 'foo' of undefined…"
-            className="w-full rounded-lg bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            rows={6}
+            placeholder={`Traceback (most recent call last):\n  File "buggy_math.py", line 2, in add\n    result = a + b\nAssertionError: assert -1 == 5`}
+            className="w-full rounded-lg bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono"
           />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
