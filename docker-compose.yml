@@ -4,10 +4,13 @@ services:
   backend:
     build:
       context: ./backend
-    env_file:
-      - ./backend/.env
     volumes:
-      - db_data:/app
+      - ./backend:/app
+      - /Users/abdulrashidomeni/DeepThink_Archetypes/Hermes-Self-Healing:/hermes-cli
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - HERMES_CLI_PATH=/usr/local/bin/hermes
     ports:
       - "8001:8000"
     healthcheck:
@@ -25,5 +28,3 @@ services:
       backend:
         condition: service_healthy
 
-volumes:
-  db_data:
