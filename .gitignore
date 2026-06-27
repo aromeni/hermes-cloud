@@ -1,0 +1,20 @@
+# secrets
+backend/.env
+
+# runtime artefacts
+backend/hermes.db
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routers/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# node
+frontend/node_modules/
+frontend/dist/
+
+# misc
+.DS_Store
+*.egg-info/
+.venv/
