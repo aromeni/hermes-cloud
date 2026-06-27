@@ -28,7 +28,7 @@ async def run_hermes_fix(incident_id: str) -> None:
     start = time.monotonic()
     pr_url: str | None = None
     final_status = IncidentStatus.failed
-    output_lines: list[str] = []
+    output: str | None = None
 
     try:
         env = _build_env()
@@ -48,7 +48,6 @@ async def run_hermes_fix(incident_id: str) -> None:
 
         stdout_bytes, _ = await proc.communicate()
         output = stdout_bytes.decode("utf-8", errors="replace")
-        output_lines = output.splitlines()
 
         match = PR_URL_PATTERN.search(output)
         if match:
@@ -57,9 +56,9 @@ async def run_hermes_fix(incident_id: str) -> None:
         final_status = IncidentStatus.success if proc.returncode == 0 else IncidentStatus.failed
 
     except FileNotFoundError:
-        output_lines = [f"hermes CLI not found at '{settings.hermes_cli_path}'"]
+        output = f"hermes CLI not found at '{settings.hermes_cli_path}'"
     except Exception as exc:  # noqa: BLE001
-        output_lines = [f"Unexpected error: {exc}"]
+        output = f"Unexpected error: {exc}"
 
     elapsed = time.monotonic() - start
     cost_saved = settings.cost_per_success if final_status == IncidentStatus.success else None
@@ -69,6 +68,7 @@ async def run_hermes_fix(incident_id: str) -> None:
         if incident:
             incident.status = final_status
             incident.pr_url = pr_url
+            incident.logs = output
             incident.time_taken = round(elapsed, 2)
             incident.cost_saved = cost_saved
             incident.updated_at = datetime.now(timezone.utc)

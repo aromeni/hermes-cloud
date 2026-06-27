@@ -20,6 +20,7 @@ class IncidentCreate(IncidentBase):
 class IncidentResponse(IncidentBase):
     id: str
     status: IncidentStatus
+    logs: Optional[str] = None
     pr_url: Optional[str] = None
     time_taken: Optional[float] = None
     cost_saved: Optional[float] = None

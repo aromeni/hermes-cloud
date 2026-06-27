@@ -26,6 +26,7 @@ class Incident(Base):
     status: Mapped[IncidentStatus] = mapped_column(
         Enum(IncidentStatus), nullable=False, default=IncidentStatus.pending
     )
+    logs: Mapped[str | None] = mapped_column(Text, nullable=True)
     pr_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     time_taken: Mapped[float | None] = mapped_column(Float, nullable=True)
     cost_saved: Mapped[float | None] = mapped_column(Float, nullable=True)
