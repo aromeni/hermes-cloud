@@ -1,26 +1,34 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { fetchIncidents, fetchStats } from "./api.js";
 import IncidentTable from "./components/IncidentTable.jsx";
 import KPICards from "./components/KPICards.jsx";
 import TriggerForm from "./components/TriggerForm.jsx";
 
 const POLL_INTERVAL_MS = 10_000;
+const FAST_POLL_MS = 3_000;
 
 export default function App() {
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
 
   const [incidents, setIncidents] = useState(null);
   const [incidentsLoading, setIncidentsLoading] = useState(true);
+  const [incidentsError, setIncidentsError] = useState(null);
   const [page, setPage] = useState(1);
+  const [hasActiveIncidents, setHasActiveIncidents] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  // Ticks every 5s so "Updated X ago" stays current between polls
+  const [, setTick] = useState(0);
   const PAGE_SIZE = 20;
 
   const loadStats = useCallback(async () => {
     try {
       const data = await fetchStats();
       setStats(data);
-    } catch (_) {
-      // swallow; backend may not be ready yet
+      setStatsError(null);
+    } catch (err) {
+      setStatsError(err.message);
     } finally {
       setStatsLoading(false);
     }
@@ -32,8 +40,13 @@ export default function App() {
       try {
         const data = await fetchIncidents(p, PAGE_SIZE);
         setIncidents(data);
-      } catch (_) {
-        // swallow
+        setHasActiveIncidents(
+          data.items.some((i) => i.status === "running" || i.status === "pending")
+        );
+        setIncidentsError(null);
+        setLastUpdated(new Date());
+      } catch (err) {
+        setIncidentsError(err.message);
       } finally {
         setIncidentsLoading(false);
       }
@@ -46,40 +59,77 @@ export default function App() {
     loadIncidents(page);
   }, [loadStats, loadIncidents, page]);
 
+  // Keep a stable ref so intervals always call the latest version of refreshAll
+  const refreshRef = useRef(refreshAll);
+  useEffect(() => {
+    refreshRef.current = refreshAll;
+  }, [refreshAll]);
+
+  // Initial load
   useEffect(() => {
     refreshAll();
-    const timer = setInterval(refreshAll, POLL_INTERVAL_MS);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Adaptive poll: 3s when incidents are active, 10s otherwise
+  useEffect(() => {
+    const delay = hasActiveIncidents ? FAST_POLL_MS : POLL_INTERVAL_MS;
+    const timer = setInterval(() => refreshRef.current(), delay);
     return () => clearInterval(timer);
-  }, [refreshAll]);
+  }, [hasActiveIncidents]);
+
+  // Keep the "Updated X ago" timestamp ticking
+  useEffect(() => {
+    const timer = setInterval(() => setTick((n) => n + 1), 5_000);
+    return () => clearInterval(timer);
+  }, []);
 
   function handlePageChange(newPage) {
     setPage(newPage);
     loadIncidents(newPage);
   }
 
+  const backendError = statsError || incidentsError;
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
-      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900 px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">⚡</span>
+            <span className="text-2xl" aria-hidden="true">⚡</span>
             <div>
               <h1 className="text-xl font-bold text-white">Hermes Cloud</h1>
               <p className="text-xs text-gray-500">Autonomous bug-fix dashboard</p>
             </div>
           </div>
-          <span className="rounded-full bg-emerald-900/60 px-3 py-1 text-xs font-medium text-emerald-400">
-            Live
-          </span>
+          <div className="flex items-center gap-3">
+            {lastUpdated && !backendError && (
+              <span className="text-xs text-gray-500" aria-live="polite">
+                Updated {formatAgo(lastUpdated)}
+              </span>
+            )}
+            {backendError ? (
+              <span className="rounded-full bg-red-900/60 px-3 py-1 text-xs font-medium text-red-400" role="alert">
+                Backend unreachable
+              </span>
+            ) : hasActiveIncidents ? (
+              <span className="rounded-full bg-blue-900/60 px-3 py-1 text-xs font-medium text-blue-300 animate-pulse">
+                ⚡ Fix running
+              </span>
+            ) : (
+              <span className="rounded-full bg-emerald-900/60 px-3 py-1 text-xs font-medium text-emerald-400">
+                Live
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 p-6">
-        <KPICards stats={stats} loading={statsLoading} />
+        <KPICards stats={stats} loading={statsLoading} error={statsError} />
         <IncidentTable
           data={incidents}
           loading={incidentsLoading}
+          error={incidentsError}
           page={page}
           pageSize={PAGE_SIZE}
           onPageChange={handlePageChange}
@@ -89,4 +139,11 @@ export default function App() {
       </main>
     </div>
   );
+}
+
+function formatAgo(date) {
+  const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (secs < 5) return "just now";
+  if (secs < 60) return `${secs}s ago`;
+  return `${Math.floor(secs / 60)}m ago`;
 }

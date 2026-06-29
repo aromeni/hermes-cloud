@@ -25,15 +25,16 @@ const CARDS = [
   {
     key: "total_cost_saved",
     label: "Cost Saved",
-    format: (v) => `$${Number(v).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+    format: (v) =>
+      `$${Number(v).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
     icon: "💰",
     color: "from-amber-500 to-amber-700",
   },
 ];
 
-export default function KPICards({ stats, loading }) {
+export default function KPICards({ stats, loading, error }) {
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4" role="region" aria-label="Key performance indicators">
       {CARDS.map(({ key, label, format, icon, color }) => (
         <div
           key={key}
@@ -41,11 +42,22 @@ export default function KPICards({ stats, loading }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-white/80">{label}</span>
-            <span className="text-xl">{icon}</span>
+            <span className="text-xl" aria-hidden="true">{icon}</span>
           </div>
-          <p className="mt-3 text-3xl font-bold text-white">
-            {loading ? "—" : stats ? format(stats[key]) : "—"}
-          </p>
+          {loading ? (
+            <div
+              className="mt-3 h-9 w-28 animate-pulse rounded-lg bg-white/20"
+              aria-label={`Loading ${label}`}
+            />
+          ) : error ? (
+            <p className="mt-3 text-2xl font-bold text-white/50" aria-label={`${label}: unavailable`}>
+              —
+            </p>
+          ) : (
+            <p className="mt-3 text-3xl font-bold text-white" aria-label={`${label}: ${stats ? format(stats[key]) : "—"}`}>
+              {stats ? format(stats[key]) : "—"}
+            </p>
+          )}
         </div>
       ))}
     </div>
