@@ -6,7 +6,6 @@ services:
       context: ./backend
     volumes:
       - ./backend:/app
-      - /Users/abdulrashidomeni/DeepThink_Archetypes/Hermes-Self-Healing:/hermes-cli
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
