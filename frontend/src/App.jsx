@@ -22,7 +22,8 @@ export default function App() {
   const [, setTick] = useState(0);
   const PAGE_SIZE = 20;
 
-  const loadStats = useCallback(async () => {
+  const loadStats = useCallback(async (silent = false) => {
+    if (!silent) setStatsLoading(true);
     try {
       const data = await fetchStats();
       setStats(data);
@@ -35,8 +36,8 @@ export default function App() {
   }, []);
 
   const loadIncidents = useCallback(
-    async (p = page) => {
-      setIncidentsLoading(true);
+    async (p = page, silent = false) => {
+      if (!silent) setIncidentsLoading(true);
       try {
         const data = await fetchIncidents(p, PAGE_SIZE);
         setIncidents(data);
@@ -48,15 +49,15 @@ export default function App() {
       } catch (err) {
         setIncidentsError(err.message);
       } finally {
-        setIncidentsLoading(false);
+        if (!silent) setIncidentsLoading(false);
       }
     },
     [page]
   );
 
-  const refreshAll = useCallback(() => {
-    loadStats();
-    loadIncidents(page);
+  const refreshAll = useCallback((silent = false) => {
+    loadStats(silent);
+    loadIncidents(page, silent);
   }, [loadStats, loadIncidents, page]);
 
   // Keep a stable ref so intervals always call the latest version of refreshAll
@@ -73,7 +74,7 @@ export default function App() {
   // Adaptive poll: 3s when incidents are active, 10s otherwise
   useEffect(() => {
     const delay = hasActiveIncidents ? FAST_POLL_MS : POLL_INTERVAL_MS;
-    const timer = setInterval(() => refreshRef.current(), delay);
+    const timer = setInterval(() => refreshRef.current(true), delay);
     return () => clearInterval(timer);
   }, [hasActiveIncidents]);
 
