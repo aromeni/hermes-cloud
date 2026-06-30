@@ -4,6 +4,7 @@ services:
   backend:
     build:
       context: ./backend
+    restart: unless-stopped
     volumes:
       - ./backend:/app
     environment:
@@ -21,6 +22,7 @@ services:
   frontend:
     build:
       context: ./frontend
+    restart: unless-stopped
     ports:
       - "3001:80"
     depends_on:
