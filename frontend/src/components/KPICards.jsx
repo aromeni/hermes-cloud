@@ -38,7 +38,7 @@ export default function KPICards({ stats, loading, error }) {
       {CARDS.map(({ key, label, format, icon, color }) => (
         <div
           key={key}
-          className={`rounded-xl bg-gradient-to-br ${color} p-5 shadow-lg`}
+          className={`rounded-xl bg-gradient-to-br ${color} p-4 shadow-lg sm:p-5`}
         >
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-white/80">{label}</span>
@@ -54,7 +54,7 @@ export default function KPICards({ stats, loading, error }) {
               —
             </p>
           ) : (
-            <p className="mt-3 text-3xl font-bold text-white" aria-label={`${label}: ${stats ? format(stats[key]) : "—"}`}>
+            <p className="mt-3 text-2xl font-bold text-white sm:text-3xl" aria-label={`${label}: ${stats ? format(stats[key]) : "—"}`}>
               {stats ? format(stats[key]) : "—"}
             </p>
           )}

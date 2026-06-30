@@ -92,18 +92,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
-      <header className="border-b border-gray-800 bg-gray-900 px-6 py-4">
+      <header className="border-b border-gray-800 bg-gray-900 px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl" aria-hidden="true">⚡</span>
             <div>
               <h1 className="text-xl font-bold text-white">Hermes Cloud</h1>
-              <p className="text-xs text-gray-500">Autonomous bug-fix dashboard</p>
+              <p className="hidden text-xs text-gray-500 sm:block">Autonomous bug-fix dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {lastUpdated && !backendError && (
-              <span className="text-xs text-gray-500" aria-live="polite">
+              <span className="hidden text-xs text-gray-500 sm:inline" aria-live="polite">
                 Updated {formatAgo(lastUpdated)}
               </span>
             )}
@@ -124,7 +124,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 p-6">
+      <main className="mx-auto max-w-7xl space-y-4 p-4 sm:space-y-6 sm:p-6">
         <KPICards stats={stats} loading={statsLoading} error={statsError} />
         <IncidentTable
           data={incidents}

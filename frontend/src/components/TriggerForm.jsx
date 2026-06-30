@@ -31,7 +31,7 @@ export default function TriggerForm({ onTriggered }) {
 
   return (
     <section
-      className="rounded-xl bg-gray-900 p-6 shadow-lg"
+      className="rounded-xl bg-gray-900 p-4 shadow-lg sm:p-6"
       aria-label="Manual trigger"
     >
       <h2 className="mb-4 text-lg font-semibold text-white">Manual Trigger</h2>
@@ -96,7 +96,7 @@ export default function TriggerForm({ onTriggered }) {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 min-h-[48px]"
+          className="w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 min-h-[48px] sm:w-auto"
         >
           {loading ? "Queuing…" : "⚡ Run Hermes Fix"}
         </button>

@@ -24,12 +24,23 @@ function StatusBadge({ status }) {
   );
 }
 
-// Skeleton row for table loading state
+// Matches column visibility: ID=sm, Error=always, Repo=md, Status=always, PR=always, Logs=always, Time=sm, Created=md
+const COL_VISIBILITY = [
+  "hidden sm:table-cell", // ID
+  "",                     // Error
+  "hidden md:table-cell", // Repo
+  "",                     // Status
+  "",                     // PR
+  "",                     // Logs
+  "hidden sm:table-cell", // Time
+  "hidden md:table-cell", // Created
+];
+
 function SkeletonRow() {
   return (
     <tr className="border-b border-gray-800/50">
-      {[...Array(8)].map((_, i) => (
-        <td key={i} className="px-6 py-4">
+      {COL_VISIBILITY.map((vis, i) => (
+        <td key={i} className={`px-3 py-4 sm:px-6 ${vis}`}>
           <div className={`h-3 animate-pulse rounded bg-gray-800 ${i === 1 ? "w-36" : i === 2 ? "w-24" : "w-16"}`} />
         </td>
       ))}
@@ -221,7 +232,7 @@ export default function IncidentTable({
 
       <div className="rounded-xl bg-gray-900 shadow-lg">
         {/* Table header */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-4 sm:px-6">
           <h2 className="text-lg font-semibold text-white">Incidents</h2>
           <button
             onClick={onRefresh}
@@ -251,14 +262,14 @@ export default function IncidentTable({
           >
             <thead>
               <tr className="border-b border-gray-800 text-gray-400">
-                <th scope="col" className="px-6 py-3 font-medium">ID</th>
-                <th scope="col" className="px-6 py-3 font-medium">Error</th>
-                <th scope="col" className="px-6 py-3 font-medium">Repo</th>
-                <th scope="col" className="px-6 py-3 font-medium">Status</th>
-                <th scope="col" className="px-6 py-3 font-medium">PR</th>
-                <th scope="col" className="px-6 py-3 font-medium">Logs</th>
-                <th scope="col" className="px-6 py-3 font-medium">Time (s)</th>
-                <th scope="col" className="px-6 py-3 font-medium">Created</th>
+                <th scope="col" className="hidden px-3 py-3 text-left font-medium sm:table-cell sm:px-6">ID</th>
+                <th scope="col" className="px-3 py-3 text-left font-medium sm:px-6">Error</th>
+                <th scope="col" className="hidden px-3 py-3 text-left font-medium md:table-cell md:px-6">Repo</th>
+                <th scope="col" className="px-3 py-3 text-left font-medium sm:px-6">Status</th>
+                <th scope="col" className="px-3 py-3 text-left font-medium sm:px-6">PR</th>
+                <th scope="col" className="px-3 py-3 text-left font-medium sm:px-6">Logs</th>
+                <th scope="col" className="hidden px-3 py-3 text-left font-medium sm:table-cell sm:px-6">Time (s)</th>
+                <th scope="col" className="hidden px-3 py-3 text-left font-medium md:table-cell md:px-6">Created</th>
               </tr>
             </thead>
             <tbody>
@@ -290,27 +301,29 @@ export default function IncidentTable({
                     ].join(" ")}
                   >
                     <td
-                      className="px-6 py-3 font-mono text-xs text-gray-400"
+                      className="hidden px-3 py-3 font-mono text-xs text-gray-400 sm:table-cell sm:px-6"
                       title={inc.id}
                     >
                       {inc.id.slice(0, 8)}
                     </td>
                     <td
-                      className="px-6 py-3 text-gray-200"
+                      className="max-w-[140px] px-3 py-3 text-gray-200 sm:max-w-none sm:px-6"
                       title={inc.error_text}
                     >
-                      {truncate(inc.error_text, 48)}
+                      <span className="block truncate sm:whitespace-normal">
+                        {truncate(inc.error_text, 48)}
+                      </span>
                     </td>
                     <td
-                      className="px-6 py-3 text-gray-400"
+                      className="hidden px-3 py-3 text-gray-400 md:table-cell md:px-6"
                       title={inc.repo_url}
                     >
                       {truncate(inc.repo_url, 32)}
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 py-3 sm:px-6">
                       <StatusBadge status={inc.status} />
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 py-3 sm:px-6">
                       {inc.pr_url ? (
                         <a
                           href={inc.pr_url}
@@ -324,7 +337,7 @@ export default function IncidentTable({
                         <span className="text-gray-600">—</span>
                       )}
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 py-3 sm:px-6">
                       <button
                         onClick={(e) => openLogs(inc.id, e)}
                         className="rounded bg-gray-700 px-3 py-2 text-xs font-medium text-gray-200 transition-colors hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 min-h-[36px] min-w-[52px]"
@@ -333,10 +346,10 @@ export default function IncidentTable({
                         View
                       </button>
                     </td>
-                    <td className="px-6 py-3 text-gray-300">
+                    <td className="hidden px-3 py-3 text-gray-300 sm:table-cell sm:px-6">
                       {inc.time_taken != null ? inc.time_taken : "—"}
                     </td>
-                    <td className="px-6 py-3 text-gray-400">
+                    <td className="hidden px-3 py-3 text-gray-400 md:table-cell md:px-6">
                       {new Date(inc.created_at).toLocaleString()}
                     </td>
                   </tr>
@@ -347,7 +360,7 @@ export default function IncidentTable({
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-gray-800 px-6 py-3 text-sm text-gray-400">
+        <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3 text-sm text-gray-400 sm:px-6">
           <span aria-live="polite">
             {total === 0
               ? "No incidents"
